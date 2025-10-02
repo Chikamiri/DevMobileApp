@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'internal/internal_student_management.dart';
+import 'internal_student_management.dart';
 
 class StudentManagerment extends StatelessWidget {
   const StudentManagerment({super.key});
