@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../internal/student_db.dart';
 
 typedef OnStudentTap = void Function(Map<String, String> student);
 
@@ -11,14 +12,7 @@ class SinhVienTab extends StatefulWidget {
 }
 
 class _SinhVienTabState extends State<SinhVienTab> {
-  final List<Map<String, String>> _allStudents = [
-    {'id': 'SV001', 'name': 'Lee Mank Duck', 'class': 'K63'},
-    {'id': 'SV002', 'name': 'Trần Thị B', 'class': 'K36.3'},
-    {'id': 'SV003', 'name': 'Negga C', 'class': 'K36'},
-    {'id': 'SV004', 'name': 'Phạm Thị D', 'class': 'K62'},
-    {'id': 'SV005', 'name': 'Hoàng Văn E', 'class': 'K61'},
-  ];
-
+  List<Map<String, String>> _allStudents = [];
   List<Map<String, String>> _filtered = [];
   String _query = '';
   bool _loading = false;
@@ -26,7 +20,21 @@ class _SinhVienTabState extends State<SinhVienTab> {
   @override
   void initState() {
     super.initState();
-    _filtered = List.from(_allStudents);
+    _loadFromDB();
+  }
+
+  Future<void> _loadFromDB() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+
+    final data = await StudentDB.getAll();
+
+    if (!mounted) return;
+    setState(() {
+      _allStudents = data;
+      _filtered = List.from(_allStudents);
+      _loading = false;
+    });
   }
 
   void _filter(String q) {
@@ -44,16 +52,67 @@ class _SinhVienTabState extends State<SinhVienTab> {
   }
 
   Future<void> _refresh() async {
-    setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _loading = false);
+    await _loadFromDB();
   }
 
   String _initials(String name) {
     final parts = name.split(' ');
+    if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0].substring(0, 1) + parts.last.substring(0, 1))
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
         .toUpperCase();
+  }
+
+  Future<void> _addStudentDialog() async {
+    final idCtrl = TextEditingController();
+    final nameCtrl = TextEditingController();
+    final classCtrl = TextEditingController();
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Thêm sinh viên'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: idCtrl,
+              decoration: const InputDecoration(labelText: 'Mã SV'),
+            ),
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: 'Họ tên'),
+            ),
+            TextField(
+              controller: classCtrl,
+              decoration: const InputDecoration(labelText: 'Lớp'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Huỷ'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (idCtrl.text.isEmpty || nameCtrl.text.isEmpty) return;
+              await StudentDB.insert({
+                'id': idCtrl.text.trim(),
+                'name': nameCtrl.text.trim(),
+                'class': classCtrl.text.trim(),
+              });
+              if (!ctx.mounted) return;
+              Navigator.of(ctx).pop();
+              if (!mounted) return;
+              await _loadFromDB();
+            },
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -73,9 +132,7 @@ class _SinhVienTabState extends State<SinhVienTab> {
                 suffixIcon: _query.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _filter('');
-                        },
+                        onPressed: () => _filter(''),
                       )
                     : null,
                 border: OutlineInputBorder(
@@ -92,11 +149,7 @@ class _SinhVienTabState extends State<SinhVienTab> {
                 Text('Danh sách sinh viên', style: theme.textTheme.titleMedium),
                 const Spacer(),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('LOLLLLLLLL')));
-                  },
+                  onPressed: _addStudentDialog,
                   icon: const Icon(Icons.person_add),
                   label: const Text('Thêm'),
                   style: ElevatedButton.styleFrom(
@@ -162,15 +215,10 @@ class _SinhVienTabState extends State<SinhVienTab> {
                             style: theme.textTheme.bodySmall,
                           ),
                           trailing: PopupMenuButton<String>(
-                            onSelected: (val) {
-                              if (val == 'edit') {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Edit (chưa implement)'),
-                                  ),
-                                );
-                              } else if (val == 'delete') {
-                                showDialog(
+                            onSelected: (val) async {
+                              if (val == 'delete') {
+                                if (!mounted) return;
+                                final ok = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
                                     title: const Text('Xác nhận'),
@@ -180,28 +228,25 @@ class _SinhVienTabState extends State<SinhVienTab> {
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
-                                            Navigator.of(ctx).pop(),
+                                            Navigator.pop(ctx, false),
                                         child: const Text('Huỷ'),
                                       ),
                                       TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _allStudents.removeWhere(
-                                              (e) => e['id'] == s['id'],
-                                            );
-                                            _filter(_query);
-                                          });
-                                          Navigator.of(ctx).pop();
-                                        },
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
                                         child: const Text('Xóa'),
                                       ),
                                     ],
                                   ),
                                 );
+                                if (ok == true && mounted) {
+                                  await StudentDB.delete(s['id']!);
+                                  if (!mounted) return;
+                                  await _loadFromDB();
+                                }
                               }
                             },
                             itemBuilder: (context) => const [
-                              PopupMenuItem(value: 'edit', child: Text('Sửa')),
                               PopupMenuItem(
                                 value: 'delete',
                                 child: Text('Xóa'),
