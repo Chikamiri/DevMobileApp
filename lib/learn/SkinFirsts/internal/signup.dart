@@ -46,6 +46,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       try {
         await DatabaseManager.instance.signUp(user);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Account created successfully! Please log in.'),

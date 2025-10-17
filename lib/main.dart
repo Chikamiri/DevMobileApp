@@ -1,12 +1,12 @@
-import 'package:app/learn/SkinFirsts/wrapper.dart';
 import 'package:flutter/material.dart';
+import 'learn/exam_test/screen/startup_screen.dart';
 
 void main() {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.orange),
-      home: Wrapper(),
+      home: const StartupScreen(),
     ),
   );
 }
