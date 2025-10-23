@@ -23,6 +23,7 @@ class _MembersScreenState extends State<MembersScreen> {
   }
 
   Future<void> _addMember(String name, String phone) async {
+    if (name.trim().isEmpty || phone.trim().isEmpty) return;
     await DBHelper.insert('members', {'name': name, 'phone': phone});
     _refresh();
   }
@@ -39,17 +40,29 @@ class _MembersScreenState extends State<MembersScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Thêm thành viên'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Thêm thành viên mới',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameCtrl,
-              decoration: const InputDecoration(labelText: 'Tên'),
+              decoration: const InputDecoration(
+                labelText: 'Tên thành viên',
+                prefixIcon: Icon(Icons.person_outline),
+              ),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: phoneCtrl,
-              decoration: const InputDecoration(labelText: 'Số điện thoại'),
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Số điện thoại',
+                prefixIcon: Icon(Icons.phone),
+              ),
             ),
           ],
         ),
@@ -58,12 +71,14 @@ class _MembersScreenState extends State<MembersScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Hủy'),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
             onPressed: () {
               _addMember(nameCtrl.text, phoneCtrl.text);
               Navigator.pop(context);
             },
-            child: const Text('Thêm'),
+            icon: const Icon(Icons.add),
+            label: const Text('Thêm'),
           ),
         ],
       ),
@@ -73,23 +88,69 @@ class _MembersScreenState extends State<MembersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
-        child: const Icon(Icons.add),
+      backgroundColor: Colors.orange.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.orange,
+        title: const Text(
+          'Danh sách thành viên',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body: ListView.builder(
-        itemCount: _members.length,
-        itemBuilder: (_, i) {
-          final m = _members[i];
-          return ListTile(
-            title: Text(m['name']),
-            subtitle: Text(m['phone']),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _deleteMember(m['id']),
-            ),
-          );
-        },
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.orange,
+        onPressed: _showAddDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Thêm'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: _members.isEmpty
+            ? const Center(
+                child: Text(
+                  'Chưa có thành viên nào',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(12),
+                itemCount: _members.length,
+                itemBuilder: (_, i) {
+                  final m = _members[i];
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.orange.shade200,
+                        child: Text(
+                          m['name'].isNotEmpty
+                              ? m['name'][0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        m['name'],
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(m['phone']),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        onPressed: () => _deleteMember(m['id']),
+                      ),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }

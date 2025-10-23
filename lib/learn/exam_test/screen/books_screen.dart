@@ -44,42 +44,81 @@ class _BooksScreenState extends State<BooksScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Thêm sách'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleCtrl,
-              decoration: const InputDecoration(labelText: 'Tên sách'),
-            ),
-            TextField(
-              controller: authorCtrl,
-              decoration: const InputDecoration(labelText: 'Tác giả'),
-            ),
-            TextField(
-              controller: yearCtrl,
-              decoration: const InputDecoration(labelText: 'Năm xuất bản'),
-              keyboardType: TextInputType.number,
-            ),
-          ],
+        title: const Text('Thêm sách mới'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Tên sách',
+                  prefixIcon: Icon(Icons.book_outlined),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: authorCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Tác giả',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: yearCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Năm xuất bản',
+                  prefixIcon: Icon(Icons.calendar_today_outlined),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Hủy'),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
+            icon: const Icon(Icons.save),
+            label: const Text('Lưu'),
             onPressed: () {
               _addBook(
-                titleCtrl.text,
-                authorCtrl.text,
-                int.tryParse(yearCtrl.text) ?? 0,
+                titleCtrl.text.trim(),
+                authorCtrl.text.trim(),
+                int.tryParse(yearCtrl.text.trim()) ?? 0,
               );
               Navigator.pop(context);
             },
-            child: const Text('Thêm'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBookCard(Map<String, dynamic> b) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.orange.shade100,
+          child: const Icon(Icons.menu_book, color: Colors.orange),
+        ),
+        title: Text(
+          b['title'] ?? 'Không tên',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          '${b['author'] ?? 'Không rõ tác giả'} — ${b['year'] ?? ''}',
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete, color: Colors.redAccent),
+          onPressed: () => _deleteBook(b['id']),
+        ),
       ),
     );
   }
@@ -87,23 +126,33 @@ class _BooksScreenState extends State<BooksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
-        child: const Icon(Icons.add),
+      backgroundColor: Colors.orange.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.orange,
+        title: const Text(
+          'Quản lý Sách',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
-      body: ListView.builder(
-        itemCount: _books.length,
-        itemBuilder: (_, i) {
-          final b = _books[i];
-          return ListTile(
-            title: Text(b['title']),
-            subtitle: Text('${b['author']} (${b['year']})'),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _deleteBook(b['id']),
-            ),
-          );
-        },
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Thêm sách'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: _books.isEmpty
+            ? const Center(
+                child: Text(
+                  'Chưa có sách nào trong thư viện',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.only(top: 8, bottom: 80),
+                itemCount: _books.length,
+                itemBuilder: (_, i) => _buildBookCard(_books[i]),
+              ),
       ),
     );
   }

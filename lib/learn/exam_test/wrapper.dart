@@ -26,19 +26,78 @@ class _WrapperState extends State<Wrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_index],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Sách'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Thành viên',
+      body: Row(
+        children: [
+          NavigationRail(
+            minWidth: 80,
+            backgroundColor: Colors.orange.shade50,
+            groupAlignment: -1.0,
+            labelType: NavigationRailLabelType.all,
+            selectedIndex: _index,
+            onDestinationSelected: (i) => setState(() => _index = i),
+            leading: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                children: const [
+                  Icon(Icons.menu_book, color: Colors.orange, size: 32),
+                  SizedBox(height: 8),
+                  Text(
+                    "THƯ VIỆN",
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            selectedIconTheme: const IconThemeData(
+              color: Colors.orange,
+              size: 28,
+            ),
+            unselectedIconTheme: const IconThemeData(color: Colors.grey),
+            selectedLabelTextStyle: const TextStyle(
+              color: Colors.orange,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+            unselectedLabelTextStyle: const TextStyle(color: Colors.grey),
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: Text('Trang chủ'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.book_outlined),
+                selectedIcon: Icon(Icons.book),
+                label: Text('Sách'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.people_outline),
+                selectedIcon: Icon(Icons.people),
+                label: Text('Thành viên'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.history_outlined),
+                selectedIcon: Icon(Icons.history),
+                label: Text('Mượn/Trả'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings),
+                label: Text('Cài đặt'),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Mượn/Trả'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Cài đặt'),
+          const VerticalDivider(thickness: 1, width: 1),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: _pages[_index],
+            ),
+          ),
         ],
       ),
     );
