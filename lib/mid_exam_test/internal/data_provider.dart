@@ -5,13 +5,12 @@ class DataProvider extends ChangeNotifier {
   final DatabaseHelper db = DatabaseHelper();
 
   Future<void> refreshAll() async {
-    // Dùng cho HomePage để reload thống kê
     notifyListeners();
   }
 
   Future<void> addSupplier(Map<String, dynamic> supplier) async {
     await db.insertSupplier(supplier);
-    notifyListeners(); // báo cho các widget khác biết có thay đổi
+    notifyListeners();
   }
 
   Future<void> addProduct(Map<String, dynamic> product) async {
@@ -23,6 +22,4 @@ class DataProvider extends ChangeNotifier {
     await db.insertExport(export);
     notifyListeners();
   }
-
-  // ... có thể thêm các hàm CRUD khác tương tự
 }

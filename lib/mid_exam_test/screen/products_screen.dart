@@ -61,14 +61,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
               final qty = int.tryParse(qtyCtrl.text) ?? 0;
               final price = double.tryParse(priceCtrl.text) ?? 0.0;
 
-              // kiểm tra xem sản phẩm đã tồn tại chưa
               final existing = await db.database.then(
                 (db) =>
                     db.query('products', where: 'name = ?', whereArgs: [name]),
               );
 
               if (existing.isNotEmpty) {
-                // nếu đã có, cộng thêm số lượng
                 final id = existing.first['id'] as int;
                 final currentQty = existing.first['quantity'] as int;
                 await db.updateProduct(id, {
@@ -76,7 +74,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   'price': price,
                 });
               } else {
-                // nếu chưa có, thêm mới
                 await db.insertProduct({
                   'name': name,
                   'quantity': qty < 0 ? 0 : qty,

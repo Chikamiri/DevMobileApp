@@ -22,14 +22,11 @@ class SettingsScreen extends StatelessWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              Navigator.pop(ctx); // đóng dialog
+              Navigator.pop(ctx);
               final db = context.read<DataProvider>().db;
               await db.deleteAndResetDatabase();
-
-              // Làm mới toàn bộ dữ liệu trong app
               await context.read<DataProvider>().refreshAll();
 
-              // Hiển thị thông báo
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

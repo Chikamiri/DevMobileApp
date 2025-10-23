@@ -21,7 +21,6 @@ class DatabaseHelper {
   }
 
   Future _onCreate(Database db, int version) async {
-    // Tạo bảng hàng hóa
     await db.execute('''
       CREATE TABLE products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // Tạo bảng nhà cung cấp
     await db.execute('''
     CREATE TABLE suppliers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +41,6 @@ class DatabaseHelper {
     )
     ''');
 
-    // Tạo bảng khách hàng
     await db.execute('''
         CREATE TABLE customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +51,6 @@ class DatabaseHelper {
   )
 ''');
 
-    // Tạo bảng phiếu xuất
     await db.execute('''
       CREATE TABLE exports (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +141,6 @@ class DatabaseHelper {
     final productId = data['productId'];
     final qty = data['quantity'] as int;
 
-    // tăng tồn kho
     final product = await db.query(
       'products',
       where: 'id = ?',
@@ -174,7 +169,6 @@ class DatabaseHelper {
   // ================= EXPORTS =================
   Future<int> insertExport(Map<String, dynamic> data) async {
     final db = await database;
-    // Khi xuất hàng: giảm tồn kho
     final productId = data['productId'];
     final qty = data['quantity'] as int;
 

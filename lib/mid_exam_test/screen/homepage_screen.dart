@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage>
     final customers = await db.getCustomers();
     final suppliers = await db.getSuppliers();
 
-    // tính tổng quantity
     int totalQty = 0;
     for (final p in products) {
       totalQty += (p['quantity'] as int? ?? 0);
@@ -61,7 +60,7 @@ class _HomePageState extends State<HomePage>
 
     return Consumer<DataProvider>(
       builder: (context, provider, _) {
-        _loadData(context); // reload khi notifyListeners()
+        _loadData(context);
 
         return Scaffold(
           body: RefreshIndicator(
@@ -79,7 +78,6 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 20),
 
-                // Tổng số mặt hàng
                 _buildCard(
                   icon: Icons.inventory,
                   title: 'Tổng số mặt hàng',
@@ -87,7 +85,6 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 12),
 
-                // Tổng số lượng tồn kho
                 _buildCard(
                   icon: Icons.store,
                   title: 'Tổng số lượng tồn kho',
@@ -95,7 +92,6 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 12),
 
-                // Tổng số phiếu xuất
                 _buildCard(
                   icon: Icons.local_shipping,
                   title: 'Tổng số phiếu xuất',
@@ -103,7 +99,6 @@ class _HomePageState extends State<HomePage>
                 ),
                 const SizedBox(height: 12),
 
-                // Khách hàng & Nhà cung cấp
                 _buildCard(
                   icon: Icons.people,
                   title: 'Khách hàng & Nhà cung cấp',
