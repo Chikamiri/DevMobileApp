@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'learn/exam_test/screen/startup_screen.dart';
+import 'package:provider/provider.dart';
+import 'mid_exam_test/wrapper.dart';
+import 'mid_exam_test/internal/data_provider.dart';
 
 void main() {
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.orange),
-      home: const StartupScreen(),
+    ChangeNotifierProvider(
+      create: (_) => DataProvider(),
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Wrapper(),
+      ),
     ),
   );
 }
