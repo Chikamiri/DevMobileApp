@@ -24,7 +24,7 @@ class YoutubeSearchPlayer extends StatefulWidget {
 
 class _YoutubeSearchPlayerState extends State<YoutubeSearchPlayer> {
   final TextEditingController _controller = TextEditingController();
-  final String apiKey = 'AIzaSyAGUlUmF1SolPNgIzd4vj3MIrLLK95HcYE';
+  final String apiKey = '';
   List<Map<String, String>> videos = [];
   String? selectedId;
   bool loading = false;
